@@ -1197,7 +1197,7 @@ QUnit.test( "select.val(space characters) (gh-2978)", function( assert ) {
 } );
 
 var testAddClass = function( valueObj, assert ) {
-	assert.expect( 9 );
+	assert.expect( 7 );
 
 	var pass, j, i,
 		div = jQuery( "#qunit-fixture div" );
@@ -1216,13 +1216,6 @@ var testAddClass = function( valueObj, assert ) {
 	assert.ok( j.hasClass( "asdf" ), "Check node,textnode,comment for addClass" );
 
 	div = jQuery( "<div/>" );
-
-	div.addClass( valueObj( "test" ) );
-	assert.equal( div.attr( "class" ), "test", "Make sure there's no extra whitespace." );
-
-	div.attr( "class", " foo" );
-	div.addClass( valueObj( "test" ) );
-	assert.equal( div.attr( "class" ), "foo test", "Make sure there's no extra whitespace." );
 
 	div.attr( "class", "foo" );
 	div.addClass( valueObj( "bar baz" ) );
@@ -1277,7 +1270,7 @@ QUnit.test( "addClass(Function) with incoming value", function( assert ) {
 } );
 
 var testRemoveClass = function( valueObj, assert ) {
-	assert.expect( 8 );
+	assert.expect( 6 );
 
 	var $set = jQuery( "#qunit-fixture div" ),
 		div = document.createElement( "div" );
@@ -1303,13 +1296,7 @@ var testRemoveClass = function( valueObj, assert ) {
 	$set.removeClass( valueObj( "asdf" ) );
 	assert.ok( !$set.hasClass( "asdf" ), "Check node,textnode,comment for removeClass" );
 
-	jQuery( div ).removeClass( valueObj( "foo" ) );
-	assert.strictEqual( jQuery( div ).attr( "class" ), undefined, "removeClass doesn't create a class attribute" );
-
 	div.className = " test foo ";
-
-	jQuery( div ).removeClass( valueObj( "foo" ) );
-	assert.equal( div.className, "test", "Make sure remaining className is trimmed." );
 
 	div.className = " test ";
 
