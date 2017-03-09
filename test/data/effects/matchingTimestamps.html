@@ -3,33 +3,51 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>Effects: matching timestamps</title>
+	<style>
+		#test-div {
+			width: 200px;
+			height: 1000px;
+			background-color: green;
+		}
+	</style>
 </head>
 <body>
 	<script src="../../jquery.js"></script>
 	<script src="../iframeTest.js"></script>
-	<div id="test-div" style="height: 1000px;"></div>
+	<div id="test-div"></div>
 	<script>
 		//<![CDATA[
 		setTimeout( function () {
 
 			// Handle a timeout.
-		    startIframeTest( false, "The test timed out" );
+//		    startIframeTest( false, "The test timed out" );
 		}, 5000 );
 
 		var maxNow = 0;
+		var maxCounter = 0;
+		var maxPerfNow = 0;
 
 		jQuery( "#test-div" ).animate( {
 			height: '2000px',
 		}, {
 			duration: 300,
 			step: function( now ) {
+				if ( maxNow > now ) {
+					console.error( "Animation is stepping back from " + maxNow + " to " + now,
+						maxCounter, window.counter, maxPerfNow, window.performance.now() );
+					console.trace();
+				}
 				if ( maxNow - now > 100 ) {
 					startIframeTest( false, "Animation is stepping back from " + maxNow + " to " + now );
 				}
-				maxNow = Math.max( now, maxNow );
+				if ( now > maxNow ) {
+					maxNow = now;
+					maxCounter = window.counter;
+					maxPerfNow = window.performance.now();
+				}
 			},
 			complete: function() {
-				startIframeTest( true );
+//				startIframeTest( true );
 			}
 		} );
 		//]]>

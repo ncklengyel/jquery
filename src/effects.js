@@ -24,10 +24,19 @@ define( [
 
 var
 	fxNow, inProgress,
+	lastTimestamp = 0,
 	rfxtypes = /^(?:toggle|show|hide)$/,
 	rrun = /queueHooks$/;
 
+window.counter = 0;
+
 function schedule( timestamp ) {
+	window.counter++;
+	window.console.log( "schedule", window.counter, timestamp );
+	if ( timestamp < lastTimestamp ) {
+		window.console.warn( "Timestamp decreased!", lastTimestamp, timestamp );
+	}
+	lastTimestamp = timestamp;
 	if ( inProgress ) {
 		if ( document.hidden === false ) {
 			window.requestAnimationFrame( schedule );
@@ -43,6 +52,7 @@ function schedule( timestamp ) {
 // values: performance.now() counter starts on page load.
 // Support: IE <10, Safari <8.0, iOS <9, Android <4.4, Node with jsdom 9.4
 function getTimestamp() {
+	window.console.log( "getTimestamp called" );
 	return window.performance.now();
 }
 
