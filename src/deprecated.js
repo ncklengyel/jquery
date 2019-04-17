@@ -59,14 +59,6 @@ jQuery.proxy = function( fn, context ) {
 	return proxy;
 };
 
-jQuery.holdReady = function( hold ) {
-	if ( hold ) {
-		jQuery.readyWait++;
-	} else {
-		jQuery.ready( true );
-	}
-};
-
 jQuery.trim = function( text ) {
 	return text == null ? "" : trim.call( text );
 };
