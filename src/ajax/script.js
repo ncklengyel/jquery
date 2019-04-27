@@ -24,9 +24,18 @@ jQuery.ajaxSetup( {
 	},
 	converters: {
 		"text script": function( text ) {
-			jQuery.globalEval( text );
+			console.log( "converters", arguments );
+//			jQuery.globalEval( text );
 			return text;
 		}
+	},
+	dataFilter: function( response, dataType ) {
+		console.log( "dataFilter", arguments );
+		if ( /\bscript|jsonp\b/.test( dataType ) ) {
+			console.log( "script dataFilter", typeof response, arguments );
+			jQuery.globalEval( response );
+		}
+		return response;
 	}
 } );
 
@@ -42,9 +51,12 @@ jQuery.ajaxPrefilter( "script", function( s ) {
 
 // Bind script tag hack transport
 jQuery.ajaxTransport( "script", function( s ) {
+	console.log( "script transport", typeof s, arguments );
+	console.dir( s );
 
 	// This transport only deals with cross domain or forced-by-attrs requests
 	if ( s.crossDomain || s.scriptAttrs ) {
+		console.log( "script transport will be applied!" );
 		var script, callback;
 		return {
 			send: function( _, complete ) {

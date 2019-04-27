@@ -2393,12 +2393,31 @@ if ( typeof window.ArrayBuffer === "undefined" || typeof new XMLHttpRequest().re
 				done();
 			}
 		} );
+
+		setTimeout( function() {
+			console.log( "testBar", window[ "testBar" ] );
+		}, 1000 );
 	} );
 
 	QUnit.test( "jQuery.getScript( Object ) - no callback", function( assert ) {
 		assert.expect( 1 );
+		var done = assert.async();
+
 		Globals.register( "testBar" );
-		jQuery.getScript( { url: url( "mock.php?action=testbar" ) } ).done( assert.async() );
+		jQuery.getScript( { url: url( "mock.php?action=testbar" ) } ).done( done );
+	} );
+
+	QUnit.test( "jQuery.getScript - error status code skips execution", function( assert ) {
+		assert.expect( 1 );
+		var done = assert.async();
+
+		Globals.register( "testBar" );
+		jQuery.getScript( {
+			url: url( "mock.php?action=errorWithScript" )
+		} ).always( function() {
+			assert.strictEqual( window[ "testBar" ], true, "Script not evaluated" );
+			done();
+		} );
 	} );
 
 // //----------- jQuery.fn.load()

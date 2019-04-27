@@ -216,6 +216,12 @@ QUnit.assert.ok( true, "mock executed");';
 		unlink( $this->cspFile );
 	}
 
+	protected function errorWithScript( $req ) {
+		header( "HTTP/1.0 400 Bad Request" );
+		header( "Content-Type: text/javascript" );
+		echo 'this.testBar = "bar";';
+	}
+
 	public function __construct() {
 		$this->cspFile = __DIR__ . '/support/csp.log';
 	}

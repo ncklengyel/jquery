@@ -226,6 +226,10 @@ var mocks = {
 		cspLog = "";
 		resp.writeHead( 200 );
 		resp.end();
+	},
+	errorWithScript: function( req, resp ) {
+		resp.writeHead( 404, { "Content-Type": "text/javascript" } );
+		resp.end( "this.testBar = 'bar'; " );
 	}
 };
 var handlers = {
