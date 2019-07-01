@@ -5,7 +5,8 @@ define( [
 	"./var/pop",
 	"./var/push",
 
-	"./selector/contains" // jQuery.contains
+	"./selector/contains", // jQuery.contains
+	"./selector/escapeSelector"
 ], function( jQuery, document, indexOf, pop, push ) {
 
 "use strict";
@@ -16,7 +17,6 @@ var preferredDoc = document;
 
 var i,
 	Expr,
-	isXML,
 	tokenize,
 	compile,
 	select,
@@ -139,25 +139,6 @@ var i,
 			String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
 	},
 
-	// CSS string/identifier serialization
-	// https://drafts.csswg.org/cssom/#common-serializing-idioms
-	rcssescape = /([\0-\x1f\x7f]|^-?\d)|^-$|[^\x80-\uFFFF\w-]/g,
-	fcssescape = function( ch, asCodePoint ) {
-		if ( asCodePoint ) {
-
-			// U+0000 NULL becomes U+FFFD REPLACEMENT CHARACTER
-			if ( ch === "\0" ) {
-				return "\uFFFD";
-			}
-
-			// Control characters and (dependent upon position) numbers get escaped as code points
-			return ch.slice( 0, -1 ) + "\\" + ch.charCodeAt( ch.length - 1 ).toString( 16 ) + " ";
-		}
-
-		// Other potentially-special ASCII characters get backslash-escaped
-		return "\\" + ch;
-	},
-
 	// Used for iframes; see `setDocument`.
 	// Support: IE 9 - 11+, Edge 12 - 18+
 	// Removing the function wrapper causes a "Permission Denied"
@@ -172,6 +153,10 @@ var i,
 		},
 		{ dir: "parentNode", next: "legend" }
 	);
+
+function selectorError( msg ) {
+	throw new Error( "Syntax error, unrecognized expression: " + msg );
+}
 
 function find( selector, context, results, seed ) {
 	var m, i, elem, nid, match, groups, newSelector,
@@ -254,7 +239,7 @@ function find( selector, context, results, seed ) {
 
 					// Capture the context ID, setting it first if necessary
 					if ( ( nid = context.getAttribute( "id" ) ) ) {
-						nid = nid.replace( rcssescape, fcssescape );
+						nid = jQuery.escapeSelector( nid );
 					} else {
 						context.setAttribute( "id", ( nid = expando ) );
 					}
@@ -437,7 +422,7 @@ function testContext( context ) {
  * @param {Element|Object} elem An element or a document
  * @returns {Boolean} True iff elem is a non-HTML XML node
  */
-isXML = find.isXML = function( elem ) {
+jQuery.isXMLDoc = function( elem ) {
 	var namespace = elem.namespaceURI,
 		docElem = ( elem.ownerDocument || elem ).documentElement;
 
@@ -451,7 +436,7 @@ isXML = find.isXML = function( elem ) {
  * @param {Element|Object} [doc] An element or document object to use to set the document
  * @returns {Object} Returns the current document
  */
-setDocument = find.setDocument = function( node ) {
+setDocument = function( node ) {
 	var subWindow,
 		doc = node ? node.ownerDocument || node : preferredDoc;
 
@@ -463,7 +448,7 @@ setDocument = find.setDocument = function( node ) {
 	// Update global variables
 	document = doc;
 	docElem = document.documentElement;
-	documentIsHTML = !isXML( document );
+	documentIsHTML = !jQuery.isXMLDoc( document );
 
 	// Support: IE 9 - 11+, Edge 12 - 18+
 	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
@@ -604,7 +589,7 @@ find.matchesSelector = function( elem, expr ) {
 
 	if ( documentIsHTML &&
 		!nonnativeSelectorCache[ expr + " " ] &&
-		( !rbuggyQSA     || !rbuggyQSA.test( expr ) ) ) {
+		( !rbuggyQSA || !rbuggyQSA.test( expr ) ) ) {
 
 		try {
 			return matches.call( elem, expr );
@@ -614,14 +599,6 @@ find.matchesSelector = function( elem, expr ) {
 	}
 
 	return find( expr, document, null, [ elem ] ).length > 0;
-};
-
-find.escape = function( sel ) {
-	return ( sel + "" ).replace( rcssescape, fcssescape );
-};
-
-find.error = function( msg ) {
-	throw new Error( "Syntax error, unrecognized expression: " + msg );
 };
 
 /**
@@ -690,7 +667,7 @@ jQuery.text = function( elem ) {
 	return ret;
 };
 
-Expr = find.selectors = {
+Expr = jQuery.expr = {
 
 	// Can be adjusted by the user
 	cacheLength: 50,
@@ -741,7 +718,7 @@ Expr = find.selectors = {
 
 				// nth-* requires argument
 				if ( !match[ 3 ] ) {
-					find.error( match[ 0 ] );
+					selectorError( match[ 0 ] );
 				}
 
 				// numeric x and y parameters for Expr.filter.CHILD
@@ -754,7 +731,7 @@ Expr = find.selectors = {
 
 			// other types prohibit arguments
 			} else if ( match[ 3 ] ) {
-				find.error( match[ 0 ] );
+				selectorError( match[ 0 ] );
 			}
 
 			return match;
@@ -978,7 +955,7 @@ Expr = find.selectors = {
 			// Remember that setFilters inherits from pseudos
 			var args,
 				fn = Expr.pseudos[ pseudo ] || Expr.setFilters[ pseudo.toLowerCase() ] ||
-					find.error( "unsupported pseudo: " + pseudo );
+					selectorError( "unsupported pseudo: " + pseudo );
 
 			// The user may use createPseudo to indicate that
 			// arguments are needed to create the filter function
@@ -1068,7 +1045,7 @@ Expr = find.selectors = {
 
 			// lang value must be a valid identifier
 			if ( !ridentifier.test( lang || "" ) ) {
-				find.error( "unsupported lang: " + lang );
+				selectorError( "unsupported lang: " + lang );
 			}
 			lang = lang.replace( runescape, funescape ).toLowerCase();
 			return function( elem ) {
@@ -1238,7 +1215,7 @@ function setFilters() {}
 setFilters.prototype = Expr.filters = Expr.pseudos;
 Expr.setFilters = new setFilters();
 
-tokenize = find.tokenize = function( selector, parseOnly ) {
+tokenize = function( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
 		cached = tokenCache[ selector + " " ];
@@ -1304,7 +1281,7 @@ tokenize = find.tokenize = function( selector, parseOnly ) {
 	}
 
 	return soFar ?
-		find.error( selector ) :
+		selectorError( selector ) :
 
 		// Cache the tokens
 		tokenCache( selector, groups ).slice( 0 );
@@ -1699,7 +1676,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		superMatcher;
 }
 
-compile = find.compile = function( selector, match /* Internal Use Only */ ) {
+compile = function( selector, match /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
 		elementMatchers = [],
@@ -1740,7 +1717,7 @@ compile = find.compile = function( selector, match /* Internal Use Only */ ) {
  * @param {Array} [results]
  * @param {Array} [seed] A set of elements to match against
  */
-select = find.select = function( selector, context, results, seed ) {
+select = function( selector, context, results, seed ) {
 	var i, tokens, token, type, find,
 		compiled = typeof selector === "function" && selector,
 		match = !seed && tokenize( ( selector = compiled.selector || selector ) );
@@ -1819,10 +1796,6 @@ select = find.select = function( selector, context, results, seed ) {
 setDocument();
 
 jQuery.find = find;
-jQuery.expr = find.selectors;
-
-jQuery.isXMLDoc = find.isXML;
-jQuery.escapeSelector = find.escape;
 
 /* eslint-enable */
 
