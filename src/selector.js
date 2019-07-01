@@ -1,11 +1,10 @@
 define( [
 	"./core",
 	"./var/document",
-	"./var/hasOwn",
 	"./var/indexOf",
 	"./var/pop",
 	"./var/push"
-], function( jQuery, document, hasOwn, indexOf, pop, push ) {
+], function( jQuery, document, indexOf, pop, push ) {
 
 "use strict";
 
@@ -15,7 +14,6 @@ var preferredDoc = document;
 
 var i,
 	Expr,
-	getText,
 	isXML,
 	tokenize,
 	compile,
@@ -29,7 +27,6 @@ var i,
 	docElem,
 	documentIsHTML,
 	rbuggyQSA,
-	rbuggyMatches,
 	matches,
 	contains,
 
@@ -513,8 +510,6 @@ setDocument = find.setDocument = function( node ) {
 
 	// QSA and matchesSelector support
 
-	rbuggyMatches = [];
-
 	rbuggyQSA = [];
 
 	var testEl = document.createElement( "fieldset" );
@@ -546,7 +541,6 @@ setDocument = find.setDocument = function( node ) {
 	matches = docElem.matches || docElem.msMatchesSelector;
 
 	rbuggyQSA = rbuggyQSA.length && new RegExp( rbuggyQSA.join( "|" ) );
-	rbuggyMatches = rbuggyMatches.length && new RegExp( rbuggyMatches.join( "|" ) );
 
 	/* Contains
 	---------------------------------------------------------------------- */
@@ -628,7 +622,6 @@ find.matchesSelector = function( elem, expr ) {
 
 	if ( documentIsHTML &&
 		!nonnativeSelectorCache[ expr + " " ] &&
-		( !rbuggyMatches || !rbuggyMatches.test( expr ) ) &&
 		( !rbuggyQSA     || !rbuggyQSA.test( expr ) ) ) {
 
 		try {
@@ -650,27 +643,6 @@ find.contains = function( context, elem ) {
 	return contains( context, elem );
 };
 
-find.attr = function( elem, name ) {
-
-	// Set document vars if needed
-	if ( ( elem.ownerDocument || elem ) !== document ) {
-		setDocument( elem );
-	}
-
-	var fn = Expr.attrHandle[ name.toLowerCase() ],
-
-		// Don't get fooled by Object.prototype properties (jQuery #13807)
-		val = fn && hasOwn.call( Expr.attrHandle, name.toLowerCase() ) ?
-			fn( elem, name, !documentIsHTML ) :
-			undefined;
-
-	if ( val !== undefined ) {
-		return val;
-	}
-
-	return elem.getAttribute( name );
-};
-
 find.escape = function( sel ) {
 	return ( sel + "" ).replace( rcssescape, fcssescape );
 };
@@ -683,7 +655,7 @@ find.error = function( msg ) {
  * Document sorting and removing duplicates
  * @param {ArrayLike} results
  */
-find.uniqueSort = function( results ) {
+jQuery.uniqueSort = function( results ) {
 	var elem,
 		duplicates = [],
 		j = 0,
@@ -709,7 +681,7 @@ find.uniqueSort = function( results ) {
  * Utility function for retrieving the text value of an array of DOM nodes
  * @param {Array|Element} elem
  */
-getText = find.getText = function( elem ) {
+jQuery.text = function( elem ) {
 	var node,
 		ret = "",
 		i = 0,
@@ -721,7 +693,7 @@ getText = find.getText = function( elem ) {
 		while ( ( node = elem[ i++ ] ) ) {
 
 			// Do not traverse comment nodes
-			ret += getText( node );
+			ret += jQuery.text( node );
 		}
 	} else if ( nodeType === 1 || nodeType === 9 || nodeType === 11 ) {
 
@@ -733,7 +705,7 @@ getText = find.getText = function( elem ) {
 
 			// Traverse its children
 			for ( elem = elem.firstChild; elem; elem = elem.nextSibling ) {
-				ret += getText( elem );
+				ret += jQuery.text( elem );
 			}
 		}
 	} else if ( nodeType === 3 || nodeType === 4 ) {
@@ -753,8 +725,6 @@ Expr = find.selectors = {
 	createPseudo: markFunction,
 
 	match: matchExpr,
-
-	attrHandle: {},
 
 	find: {},
 
@@ -879,7 +849,7 @@ Expr = find.selectors = {
 
 		"ATTR": function( name, operator, check ) {
 			return function( elem ) {
-				var result = find.attr( elem, name );
+				var result = jQuery.attr( elem, name );
 
 				if ( result == null ) {
 					return operator === "!=";
@@ -1110,7 +1080,7 @@ Expr = find.selectors = {
 		"contains": markFunction( function( text ) {
 			text = text.replace( runescape, funescape );
 			return function( elem ) {
-				return ( elem.textContent || getText( elem ) ).indexOf( text ) > -1;
+				return ( elem.textContent || jQuery.text( elem ) ).indexOf( text ) > -1;
 			};
 		} ),
 
@@ -1738,7 +1708,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 				if ( outermost && !seed && setMatched.length > 0 &&
 					( matchedCount + setMatchers.length ) > 1 ) {
 
-					find.uniqueSort( results );
+					jQuery.uniqueSort( results );
 				}
 			}
 
@@ -1878,11 +1848,6 @@ setDocument();
 jQuery.find = find;
 jQuery.expr = find.selectors;
 
-// Deprecated
-jQuery.expr[ ":" ] = jQuery.expr.pseudos;
-
-jQuery.uniqueSort = jQuery.unique = find.uniqueSort;
-jQuery.text = find.getText;
 jQuery.isXMLDoc = find.isXML;
 jQuery.contains = find.contains;
 jQuery.escapeSelector = find.escape;

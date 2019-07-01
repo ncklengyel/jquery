@@ -1810,7 +1810,7 @@ QUnit.test( "jQuery.contains in SVG (jQuery trac-10832)", function( assert ) {
 } );
 
 QUnit.test( "jQuery.uniqueSort", function( assert ) {
-	assert.expect( 15 );
+	assert.expect( 14 );
 
 	function Arrayish( arr ) {
 		var i = this.length = arr.length;
@@ -1886,8 +1886,6 @@ QUnit.test( "jQuery.uniqueSort", function( assert ) {
 		assert.deepEqual( jQuery.uniqueSort( test.input ).slice( 0, length ), test.expected, label + " (array)" );
 		assert.deepEqual( jQuery.uniqueSort( new Arrayish( test.input ) ).slice( 0, length ), test.expected, label + " (quasi-array)" );
 	} );
-
-	assert.strictEqual( jQuery.unique, jQuery.uniqueSort, "jQuery.unique() is an alias for jQuery.uniqueSort()" );
 } );
 
 testIframe(
