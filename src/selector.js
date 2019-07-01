@@ -19,13 +19,9 @@ var preferredDoc = document;
 
 var i,
 	Expr,
-	tokenize,
-	compile,
-	select,
 	outermostContext,
 
 	// Local document vars
-	setDocument,
 	document,
 	docElem,
 	documentIsHTML,
@@ -431,7 +427,7 @@ jQuery.isXMLDoc = function( elem ) {
  * @param {Element|Object} [doc] An element or document object to use to set the document
  * @returns {Object} Returns the current document
  */
-setDocument = function( node ) {
+function setDocument( node ) {
 	var subWindow,
 		doc = node ? node.ownerDocument || node : preferredDoc;
 
@@ -524,7 +520,7 @@ setDocument = function( node ) {
 	rbuggyQSA = rbuggyQSA.length && new RegExp( rbuggyQSA.join( "|" ) );
 
 	return document;
-};
+}
 
 find.matches = function( expr, elements ) {
 	return find( expr, null, null, elements );
@@ -1099,7 +1095,7 @@ function setFilters() {}
 setFilters.prototype = Expr.filters = Expr.pseudos;
 Expr.setFilters = new setFilters();
 
-tokenize = function( selector, parseOnly ) {
+function tokenize( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
 		cached = tokenCache[ selector + " " ];
@@ -1560,7 +1556,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		superMatcher;
 }
 
-compile = function( selector, match /* Internal Use Only */ ) {
+function compile( selector, match /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
 		elementMatchers = [],
@@ -1590,7 +1586,7 @@ compile = function( selector, match /* Internal Use Only */ ) {
 		cached.selector = selector;
 	}
 	return cached;
-};
+}
 
 /**
  * A low-level selection function that works with jQuery's compiled
@@ -1601,7 +1597,7 @@ compile = function( selector, match /* Internal Use Only */ ) {
  * @param {Array} [results]
  * @param {Array} [seed] A set of elements to match against
  */
-select = function( selector, context, results, seed ) {
+function select( selector, context, results, seed ) {
 	var i, tokens, token, type, find,
 		compiled = typeof selector === "function" && selector,
 		match = !seed && tokenize( ( selector = compiled.selector || selector ) );
