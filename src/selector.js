@@ -5,8 +5,10 @@ define( [
 	"./var/pop",
 	"./var/push",
 
-	"./selector/contains", // jQuery.contains
-	"./selector/escapeSelector"
+	// The following utils are attached directly to the jQuery object.
+	"./selector/contains",
+	"./selector/escapeSelector",
+	"./selector/uniqueSort"
 ], function( jQuery, document, indexOf, pop, push ) {
 
 "use strict";
@@ -21,7 +23,6 @@ var i,
 	compile,
 	select,
 	outermostContext,
-	hasDuplicate,
 
 	// Local document vars
 	setDocument,
@@ -39,12 +40,6 @@ var i,
 	tokenCache = createCache(),
 	compilerCache = createCache(),
 	nonnativeSelectorCache = createCache(),
-	sortOrder = function( a, b ) {
-		if ( a === b ) {
-			hasDuplicate = true;
-		}
-		return 0;
-	},
 
 	booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|" +
 		"loop|multiple|open|readonly|required|scoped",
@@ -528,51 +523,6 @@ setDocument = function( node ) {
 
 	rbuggyQSA = rbuggyQSA.length && new RegExp( rbuggyQSA.join( "|" ) );
 
-	/* Sorting
-	---------------------------------------------------------------------- */
-
-	// Document order sorting
-	sortOrder = function( a, b ) {
-
-		// Flag for duplicate removal
-		if ( a === b ) {
-			hasDuplicate = true;
-			return 0;
-		}
-
-		// Sort on method existence if only one input has compareDocumentPosition
-		var compare = !a.compareDocumentPosition - !b.compareDocumentPosition;
-		if ( compare ) {
-			return compare;
-		}
-
-		// Calculate position if both inputs belong to the same document
-		compare = ( a.ownerDocument || a ) === ( b.ownerDocument || b ) ?
-			a.compareDocumentPosition( b ) :
-
-			// Otherwise we know they are disconnected
-			1;
-
-		// Disconnected nodes
-		if ( compare & 1 ) {
-
-			// Choose the first element that is related to our preferred document
-			if ( a === document || a.ownerDocument === preferredDoc &&
-				jQuery.contains( preferredDoc, a ) ) {
-				return -1;
-			}
-			if ( b === document || b.ownerDocument === preferredDoc &&
-				jQuery.contains( preferredDoc, b ) ) {
-				return 1;
-			}
-
-			// Maintain original order
-			return 0;
-		}
-
-		return compare & 4 ? -1 : 1;
-	};
-
 	return document;
 };
 
@@ -599,32 +549,6 @@ find.matchesSelector = function( elem, expr ) {
 	}
 
 	return find( expr, document, null, [ elem ] ).length > 0;
-};
-
-/**
- * Document sorting and removing duplicates
- * @param {ArrayLike} results
- */
-jQuery.uniqueSort = function( results ) {
-	var elem,
-		duplicates = [],
-		j = 0,
-		i = 0;
-
-	results.sort( sortOrder );
-
-	if ( hasDuplicate ) {
-		while ( ( elem = results[ i++ ] ) ) {
-			if ( elem === results[ i ] ) {
-				j = duplicates.push( i );
-			}
-		}
-		while ( j-- ) {
-			results.splice( duplicates[ j ], 1 );
-		}
-	}
-
-	return results;
 };
 
 /**
