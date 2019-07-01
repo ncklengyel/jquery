@@ -280,6 +280,11 @@ if ( !window.__karma__ ) {
 QUnit.isSwarm = ( QUnit.urlParams.swarmURL + "" ).indexOf( "http" ) === 0;
 QUnit.basicTests = ( QUnit.urlParams.module + "" ) === "basic";
 
+// Says whether jQuery selector extensions are supported. Change that to `false`
+// if your custom jQuery versions relies more on native qSA.
+// TODO do we want to keep this or just assume support for jQuery extensions?
+QUnit.jQuerySelectors = true;
+
 // Support: IE 11+
 // A variable to make it easier to skip specific tests in IE, mostly
 // testing integrations with newer Web features not supported by it.
