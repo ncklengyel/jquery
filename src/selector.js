@@ -409,7 +409,7 @@ function testContext( context ) {
 
 /**
  * Sets document-related variables once based on the current document
- * @param {Element|Object} [doc] An element or document object to use to set the document
+ * @param {Element|Object} [node] An element or document object to use to set the document
  * @returns {Object} Returns the current document
  */
 function setDocument( node ) {
@@ -1150,7 +1150,7 @@ function tokenize( selector, parseOnly ) {
 
 		// Cache the tokens
 		tokenCache( selector, groups ).slice( 0 );
-};
+}
 
 function toSelector( tokens ) {
 	var i = 0,
@@ -1655,7 +1655,7 @@ function select( selector, context, results, seed ) {
 		!context || rsibling.test( selector ) && testContext( context.parentNode ) || context
 	);
 	return results;
-};
+}
 
 // Initialize against the default document
 setDocument();
