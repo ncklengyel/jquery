@@ -209,7 +209,7 @@ function find( selector, context, results, seed ) {
 			}
 
 			// Take advantage of querySelectorAll
-			if ( !nonnativeSelectorCache[ selector + " " ] &&
+			if ( !nonnativeSelectorCache.get( selector ) &&
 				( !rbuggyQSA || !rbuggyQSA.test( selector ) ) ) {
 
 				newSelector = selector;
@@ -257,7 +257,7 @@ function find( selector, context, results, seed ) {
 					);
 					return results;
 				} catch ( qsaError ) {
-					nonnativeSelectorCache( selector, true );
+					nonnativeSelectorCache.set( selector, true );
 				} finally {
 					if ( nid === expando ) {
 						context.removeAttribute( "id" );
@@ -278,19 +278,21 @@ function find( selector, context, results, seed ) {
  *	deleting the oldest entry
  */
 function createCache() {
-	var keys = [];
+	var keys = [],
+		map = new Map(),
+		origSet = map.set;
 
-	function cache( key, value ) {
-
-		// Use (key + " ") to avoid collision with native prototype properties (see Issue #157)
-		if ( keys.push( key + " " ) > Expr.cacheLength ) {
+	map.set = function( key ) {
+		if ( keys.push( key ) > Expr.cacheLength ) {
 
 			// Only keep the most recent entries
-			delete cache[ keys.shift() ];
+			map.delete( keys.shift() );
 		}
-		return ( cache[ key + " " ] = value );
-	}
-	return cache;
+
+		return origSet.apply( this, arguments );
+	};
+
+	return map;
 }
 
 /**
@@ -454,13 +456,13 @@ find.matchesSelector = function( elem, expr ) {
 	setDocument( elem );
 
 	if ( documentIsHTML &&
-		!nonnativeSelectorCache[ expr + " " ] &&
+		!nonnativeSelectorCache.get( expr ) &&
 		( !rbuggyQSA || !rbuggyQSA.test( expr ) ) ) {
 
 		try {
 			return matches.call( elem, expr );
 		} catch ( e ) {
-			nonnativeSelectorCache( expr, true );
+			nonnativeSelectorCache.set( expr, true );
 		}
 	}
 
@@ -611,19 +613,24 @@ Expr = jQuery.expr = {
 		},
 
 		CLASS: function( className ) {
-			var pattern = classCache[ className + " " ];
+			var fn,
+				pattern = classCache[ className + " " ];
 
-			return pattern ||
-				( pattern = new RegExp( "(^|" + whitespace + ")" + className +
-					"(" + whitespace + "|$)" ) ) &&
-				classCache( className, function( elem ) {
-					return pattern.test(
-						typeof elem.className === "string" && elem.className ||
-							typeof elem.getAttribute !== "undefined" &&
-								elem.getAttribute( "class" ) ||
-							""
-					);
-				} );
+			if ( pattern ) {
+				return pattern;
+			}
+			pattern = new RegExp( "(^|" + whitespace + ")" + className +
+				"(" + whitespace + "|$)" );
+			fn = function( elem ) {
+				return pattern.test(
+					typeof elem.className === "string" && elem.className ||
+						typeof elem.getAttribute !== "undefined" &&
+							elem.getAttribute( "class" ) ||
+						""
+				);
+			};
+			classCache.set( className, fn );
+			return fn;
 		},
 
 		ATTR: function( name, operator, check ) {
@@ -1045,7 +1052,7 @@ Expr.setFilters = new setFilters();
 function tokenize( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
-		cached = tokenCache[ selector + " " ];
+		cached = tokenCache.get( selector );
 
 	if ( cached ) {
 		return parseOnly ? 0 : cached.slice( 0 );
@@ -1107,11 +1114,13 @@ function tokenize( selector, parseOnly ) {
 		return soFar.length;
 	}
 
-	return soFar ?
-		selectorError( selector ) :
+	if ( soFar ) {
+		return selectorError( selector );
+	}
 
-		// Cache the tokens
-		tokenCache( selector, groups ).slice( 0 );
+	// Cache the tokens
+	tokenCache.set( selector, groups );
+	return groups.slice( 0 );
 }
 
 function toSelector( tokens ) {
@@ -1517,7 +1526,7 @@ function compile( selector, match /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
 		elementMatchers = [],
-		cached = compilerCache[ selector + " " ];
+		cached = compilerCache.get( selector );
 
 	if ( !cached ) {
 
@@ -1536,8 +1545,8 @@ function compile( selector, match /* Internal Use Only */ ) {
 		}
 
 		// Cache the compiled function
-		cached = compilerCache( selector,
-			matcherFromGroupMatchers( elementMatchers, setMatchers ) );
+		cached = matcherFromGroupMatchers( elementMatchers, setMatchers );
+		compilerCache.set( selector, cached );
 
 		// Save selector and tokenization
 		cached.selector = selector;

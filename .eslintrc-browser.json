@@ -15,7 +15,10 @@
 	"env": {},
 
 	"globals": {
-		"window": true
+		"window": true,
+		"Set": false,
+		"Map": false,
+		"WeakMap": false
 	},
 
 	"rules": {
