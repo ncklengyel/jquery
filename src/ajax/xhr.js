@@ -64,12 +64,9 @@ jQuery.ajaxTransport( function( options ) {
 						if ( type === "abort" ) {
 							xhr.abort();
 						} else if ( type === "error" ) {
-							complete( {
 
-								// File: protocol always yields status 0; see #8605, #14207
-								status: xhr.status,
-								statusText: xhr.statusText
-							} );
+							// File: protocol always yields status 0; see #8605, #14207
+							complete( xhr );
 						} else {
 							complete( {
 								status: xhrSuccessStatus[ xhr.status ] || xhr.status,
