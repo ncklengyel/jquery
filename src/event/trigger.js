@@ -6,8 +6,10 @@ define( [
 	"../var/hasOwn",
 	"../var/isFunction",
 	"../var/isWindow",
+	"../event/eventSpecialFor",
 	"../event"
-], function( jQuery, document, dataPriv, acceptData, hasOwn, isFunction, isWindow ) {
+], function( jQuery, document, dataPriv, acceptData, hasOwn, isFunction,
+	isWindow, eventSpecialFor ) {
 
 "use strict";
 
@@ -70,7 +72,7 @@ jQuery.extend( jQuery.event, {
 			jQuery.makeArray( data, [ event ] );
 
 		// Allow special events to draw outside the lines
-		special = jQuery.event.special[ type ] || {};
+		special = eventSpecialFor( type );
 		if ( !onlyHandlers && special.trigger && special.trigger.apply( elem, data ) === false ) {
 			return;
 		}

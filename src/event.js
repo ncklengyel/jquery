@@ -9,11 +9,12 @@ define( [
 	"./data/var/acceptData",
 	"./data/var/dataPriv",
 	"./core/nodeName",
+	"./event/eventSpecialFor",
 
 	"./core/init",
 	"./selector"
 ], function( jQuery, document, documentElement, isFunction, rnothtmlwhite,
-	rcheckableType, slice, acceptData, dataPriv, nodeName ) {
+	rcheckableType, slice, acceptData, dataPriv, nodeName, eventSpecialFor ) {
 
 "use strict";
 
@@ -176,13 +177,13 @@ jQuery.event = {
 			}
 
 			// If event changes its type, use the special event handlers for the changed type
-			special = jQuery.event.special[ type ] || {};
+			special = eventSpecialFor( type );
 
 			// If selector defined, determine special event api type, otherwise given type
 			type = ( selector ? special.delegateType : special.bindType ) || type;
 
 			// Update special based on newly reset type
-			special = jQuery.event.special[ type ] || {};
+			special = eventSpecialFor( type );
 
 			// handleObj is passed to all event handlers
 			handleObj = jQuery.extend( {
@@ -260,7 +261,7 @@ jQuery.event = {
 				continue;
 			}
 
-			special = jQuery.event.special[ type ] || {};
+			special = eventSpecialFor( type );
 			type = ( selector ? special.delegateType : special.bindType ) || type;
 			handlers = events[ type ] || [];
 			tmp = tmp[ 2 ] &&
@@ -317,7 +318,7 @@ jQuery.event = {
 			handlers = (
 					dataPriv.get( this, "events" ) || Object.create( null )
 				)[ event.type ] || [],
-			special = jQuery.event.special[ event.type ] || {};
+			special = eventSpecialFor( event.type );
 
 		// Use the fix-ed jQuery.Event rather than the (read-only) native event
 		args[ 0 ] = event;
@@ -353,7 +354,7 @@ jQuery.event = {
 					event.handleObj = handleObj;
 					event.data = handleObj.data;
 
-					ret = ( ( jQuery.event.special[ handleObj.origType ] || {} ).handle ||
+					ret = ( eventSpecialFor( handleObj.origType ).handle ||
 						handleObj.handler ).apply( matched.elem, args );
 
 					if ( ret !== undefined ) {
@@ -593,7 +594,7 @@ function leverageNative( el, type, expectSync ) {
 				// This technically gets the ordering wrong w.r.t. to `.trigger()` (in which the
 				// bubbling surrogate propagates *after* the non-bubbling base), but that seems
 				// less bad than duplication.
-				} else if ( ( jQuery.event.special[ type ] || {} ).delegateType ) {
+				} else if ( ( eventSpecialFor( type ) ).delegateType ) {
 					event.stopPropagation();
 				}
 

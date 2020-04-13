@@ -19,6 +19,7 @@ define( [
 	"./data/var/acceptData",
 	"./core/DOMEval",
 	"./core/nodeName",
+	"./event/eventSpecialFor",
 
 	"./core/init",
 	"./traversing",
@@ -27,7 +28,7 @@ define( [
 ], function( jQuery, isAttached, flat, isFunction, push, rcheckableType,
 	access, rtagName, rscriptType,
 	wrapMap, getAll, setGlobalEval, buildFragment, support,
-	dataPriv, dataUser, acceptData, DOMEval, nodeName ) {
+	dataPriv, dataUser, acceptData, DOMEval, nodeName, eventSpecialFor ) {
 
 "use strict";
 
@@ -276,7 +277,6 @@ jQuery.extend( {
 
 	cleanData: function( elems ) {
 		var data, elem, type,
-			special = jQuery.event.special,
 			i = 0;
 
 		for ( ; ( elem = elems[ i ] ) !== undefined; i++ ) {
@@ -284,7 +284,7 @@ jQuery.extend( {
 				if ( ( data = elem[ dataPriv.expando ] ) ) {
 					if ( data.events ) {
 						for ( type in data.events ) {
-							if ( special[ type ] ) {
+							if ( eventSpecialFor( type ) ) {
 								jQuery.event.remove( elem, type );
 
 							// This is a shortcut to avoid jQuery.event.remove's overhead
