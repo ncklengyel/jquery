@@ -10,6 +10,7 @@ module.exports = function( grunt ) {
 	const fs = require( "fs" );
 	const path = require( "path" );
 	const rollup = require( "rollup" );
+	const rollupReplace = require( "@rollup/plugin-replace" );
 	const rollupFileOverrides = require( "./lib/rollup-plugin-file-overrides" );
 	const Insight = require( "insight" );
 	const pkg = require( "../../package.json" );
@@ -236,6 +237,8 @@ module.exports = function( grunt ) {
 							amdName ? "$1\"" + amdName + "\"$2" : "" ) );
 			}
 
+			let noIe = !!grunt.option( "no-ie" );
+
 			grunt.verbose.writeflags( excluded, "Excluded" );
 			grunt.verbose.writeflags( included, "Included" );
 
@@ -283,7 +286,21 @@ module.exports = function( grunt ) {
 
 			const bundle = await rollup.rollup( {
 				...inputRollupOptions,
-				plugins: [ rollupFileOverrides( fileOverrides ) ]
+				plugins: [
+					rollupFileOverrides( fileOverrides ),
+
+					// We apply IE workarounds based on the `document.documentMode`
+					// value; setting it to `undefined` which it evaluates to in
+					// non-IE browsers will drop some IE-only workarounds.
+					...( noIe ?
+						[
+							rollupReplace( {
+								"document.documentMode": undefined
+							} )
+						] :
+						[]
+					)
+				]
 			} );
 
 			const { output: [ { code } ] } = await bundle.generate( outputRollupOptions );

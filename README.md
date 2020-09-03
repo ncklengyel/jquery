@@ -111,6 +111,16 @@ Or, to define anonymously, set the name to an empty string.
 grunt custom --amd=""
 ```
 
+#### No-IE mode
+
+By passing `--no-ie` to the `custom` Grunt task, you can exclude workarounds for Internet Explorer:
+
+```bash
+grunt custom --no-ie
+```
+
+Note that it doesn't exclude all workarounds, just the most isolated ones.
+
 #### Custom Build Examples
 
 To create a custom build, first check out the version:
