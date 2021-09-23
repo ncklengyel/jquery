@@ -4,8 +4,11 @@ define( [
 	"./var/rboxStyle",
 	"./var/rnumnonpx",
 	"./var/getStyles",
+	"./var/rcustomProp",
+	"../var/rtrimAscii",
 	"./support"
-], function( jQuery, isAttached, rboxStyle, rnumnonpx, getStyles, support ) {
+], function( jQuery, isAttached, rboxStyle, rnumnonpx, getStyles,
+	rcustomProp, rtrimAscii, support ) {
 
 "use strict";
 
@@ -16,15 +19,22 @@ function curCSS( elem, name, computed ) {
 		// Retrieving style before computed somehow
 		// fixes an issue with getting wrong values
 		// on detached elements
-		style = elem.style;
+		style = elem.style,
+
+		isCustomProp = rcustomProp.test( name );
 
 	computed = computed || getStyles( elem );
 
 	// getPropertyValue is needed for:
 	//   .css('filter') (IE 9 only, #12537)
-	//   .css('--customProperty) (#3144)
+	//   .css('--customProperty) (gh-3144)
 	if ( computed ) {
 		ret = computed.getPropertyValue( name ) || computed[ name ];
+
+		// trim whitespace for custom property (issue gh-4926)
+		if ( isCustomProp ) {
+			ret = ret.replace( rtrimAscii, "$1" );
+		}
 
 		if ( ret === "" && !isAttached( elem ) ) {
 			ret = jQuery.style( elem, name );
@@ -55,7 +65,7 @@ function curCSS( elem, name, computed ) {
 
 	return ret !== undefined ?
 
-		// Support: IE <=9 - 11 only
+		// Support: IE <=9 - 11+
 		// IE returns zIndex value as an integer.
 		ret + "" :
 		ret;
