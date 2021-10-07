@@ -23,6 +23,12 @@
 				expected: "trusted-types-attributes.js",
 				message: messagePrefix + ": script URL properly set"
 			} );
+
+			results.push( {
+				actual: window.testMessage,
+				expected: "script run",
+				message: messagePrefix + ": script run"
+			} );
 		} catch ( e ) {
 			results.push( {
 				actual: "error thrown",
